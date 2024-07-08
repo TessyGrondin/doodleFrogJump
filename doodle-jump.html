@@ -55,8 +55,6 @@ let platforms = [{
   y: platformStart
 }];
 
-context.font = "30px Arial";
-
 function random(min, max) {
   return Math.random() * (max - min) + min;
 }
@@ -166,9 +164,10 @@ function loop() {
       }
     });
 
-    context.fillStyle = 'yellow';
     context.drawImage(doodle.frog, doodle.currentFrame * 64, 0, 64, 64, doodle.x, doodle.y, doodle.width, doodle.height);
 
+    context.font = "30px Arial";
+    context.fillStyle = 'yellow';
     context.fillText(Math.round(meters), canvas.width - (Math.round(meters).toString().length + 1) * 20, 40)
     context.fillText("Time left : " + time, 10, 40)
 
@@ -180,8 +179,16 @@ function loop() {
       return platform.y < canvas.height;
     })
   } else {
+    context.fillStyle = 'green';
+    context.font = "50px Arial";
     context.drawImage(background, 0, 0, 2000, 2000, 0, 0, canvas.width, canvas.height);
+    context.fillText("Maximum height", 10, canvas.height / 2 - 40);
+    context.fillText("reached :", 10, canvas.height / 2);
+    context.fillText(Math.round(meters) + "m", 10, canvas.height / 2 + 60)
+    context.font = "20px Arial";
+    context.fillText("tap to restart", canvas.width - 15 * 17, canvas.height - 10);
     if (mousedown) {
+      meters = 0;
       end = false;
     }
   }
@@ -191,7 +198,6 @@ function initialize() {
   leftState = 0
   rightState = 0
   time = 60
-  meters = 0
   minPlatformSpace = 15;
   maxPlatformSpace = 20;
   doodle.x = canvas.width / 2 - 20
