@@ -42,6 +42,8 @@ let leftState = 0;
 let rightState = 0;
 let time = 60;
 
+let end = false;
+
 let platformImage = new Image();
 platformImage.src = "platform.png"
 
@@ -94,87 +96,95 @@ function loop() {
   requestAnimationFrame(loop);
   context.clearRect(0,0,canvas.width,canvas.height);
 
-  doodle.dy += gravity;
+  if (!end) {
+    doodle.dy += gravity;
 
-  if (doodle.y < canvas.height / 2 && doodle.dy < 0) {
+    if (doodle.y < canvas.height / 2 && doodle.dy < 0) {
+      platforms.forEach(function(platform) {
+        platform.y += -doodle.dy;
+      });
+      while (platforms[platforms.length - 1].y > 0) {
+        platforms.push({
+          x: random(25, canvas.width - 25 - platformWidth),
+          y: platforms[platforms.length - 1].y - (platformHeight + random(minPlatformSpace, maxPlatformSpace))
+        })
+        minPlatformSpace += 0.5;
+        maxPlatformSpace += 0.5;
+        maxPlatformSpace = Math.min(maxPlatformSpace, canvas.height / 2);
+      }
+      meters += -doodle.dy
+    } else {
+      doodle.y += doodle.dy;
+    }
+
+    if (!mousedown) {
+      if (playerDir < 0) {
+        doodle.dx += drag;
+
+        if (doodle.dx > 0) {
+          doodle.dx = 0;
+          playerDir = 0;
+        }
+      } else if (playerDir > 0) {
+        doodle.dx -= drag;
+
+        if (doodle.dx < 0) {
+          doodle.dx = 0;
+          playerDir = 0;
+        }
+      }
+    }
+
+    doodle.x += doodle.dx;
+
+    if (doodle.x + doodle.width < 0) {
+      doodle.x = canvas.width;
+    } else if (doodle.x > canvas.width) {
+      doodle.x = -doodle.width;
+    }
+
+    if (doodle.y > canvas.height || time <= 0) {
+      end = true;
+      initialize();
+    }
+
+    context.drawImage(background, 0, 0, 2000, 2000, 0, 0, canvas.width, canvas.height);
+
     platforms.forEach(function(platform) {
-      platform.y += -doodle.dy;
+      context.drawImage(platformImage, 0, 0, 80, 16, platform.x, platform.y, platformWidth, platformHeight);
+
+      if (
+        doodle.dy > 0 &&
+        prevDoodleY + doodle.height <= platform.y &&
+        doodle.x < platform.x + platformWidth &&
+        doodle.x + doodle.width > platform.x &&
+        doodle.y < platform.y + platformHeight &&
+        doodle.y + doodle.height > platform.y
+      ) {
+        doodle.y = platform.y - doodle.height;
+        doodle.dy = bounceVelocity;
+      }
     });
-    while (platforms[platforms.length - 1].y > 0) {
-      platforms.push({
-        x: random(25, canvas.width - 25 - platformWidth),
-        y: platforms[platforms.length - 1].y - (platformHeight + random(minPlatformSpace, maxPlatformSpace))
-      })
-      minPlatformSpace += 0.5;
-      maxPlatformSpace += 0.5;
-      maxPlatformSpace = Math.min(maxPlatformSpace, canvas.height / 2);
-    }
-    // meters += -doodle.dy
+
+    context.fillStyle = 'yellow';
+    context.drawImage(doodle.frog, doodle.currentFrame * 64, 0, 64, 64, doodle.x, doodle.y, doodle.width, doodle.height);
+
+    context.fillText(Math.round(meters), canvas.width - (Math.round(meters).toString().length + 1) * 20, 40)
+    context.fillText("Time left : " + time, 10, 40)
+
+    context.drawImage(buttonImage, leftState * 64, 0, 64, 64, 30, canvas.height - 70, 64, 64);
+    context.drawImage(buttonImage, rightState * 64 + 128, 0, 64, 64, canvas.width - 94, canvas.height - 70, 64, 64);
+    prevDoodleY = doodle.y;
+
+    platforms = platforms.filter(function(platform) {
+      return platform.y < canvas.height;
+    })
   } else {
-    doodle.y += doodle.dy;
-  }
-
-  if (!mousedown) {
-    if (playerDir < 0) {
-      doodle.dx += drag;
-
-      if (doodle.dx > 0) {
-        doodle.dx = 0;
-        playerDir = 0;
-      }
-    } else if (playerDir > 0) {
-      doodle.dx -= drag;
-
-      if (doodle.dx < 0) {
-        doodle.dx = 0;
-        playerDir = 0;
-      }
+    context.drawImage(background, 0, 0, 2000, 2000, 0, 0, canvas.width, canvas.height);
+    if (mousedown) {
+      end = false;
     }
   }
-
-  doodle.x += doodle.dx;
-
-  if (doodle.x + doodle.width < 0) {
-    doodle.x = canvas.width;
-  } else if (doodle.x > canvas.width) {
-    doodle.x = -doodle.width;
-  }
-
-  if (doodle.y > canvas.height || time <= 0) {
-    initialize();
-  }
-
-  context.drawImage(background, 0, 0, 2000, 2000, 0, 0, canvas.width, canvas.height);
-
-  platforms.forEach(function(platform) {
-    context.drawImage(platformImage, 0, 0, 80, 16, platform.x, platform.y, platformWidth, platformHeight);
-
-    if (
-      doodle.dy > 0 &&
-      prevDoodleY + doodle.height <= platform.y &&
-      doodle.x < platform.x + platformWidth &&
-      doodle.x + doodle.width > platform.x &&
-      doodle.y < platform.y + platformHeight &&
-      doodle.y + doodle.height > platform.y
-    ) {
-      doodle.y = platform.y - doodle.height;
-      doodle.dy = bounceVelocity;
-    }
-  });
-
-  context.fillStyle = 'yellow';
-  context.drawImage(doodle.frog, doodle.currentFrame * 64, 0, 64, 64, doodle.x, doodle.y, doodle.width, doodle.height);
-
-  context.fillText(Math.round(meters), canvas.width - (Math.round(meters).toString().length + 1) * 20, 40)
-  context.fillText("Time left : " + time, 10, 40)
-
-  context.drawImage(buttonImage, leftState * 64, 0, 64, 64, 30, canvas.height - 70, 64, 64);
-  context.drawImage(buttonImage, rightState * 64 + 128, 0, 64, 64, canvas.width - 94, canvas.height - 70, 64, 64);
-  prevDoodleY = doodle.y;
-
-  platforms = platforms.filter(function(platform) {
-    return platform.y < canvas.height;
-  })
 }
 
 function initialize() {
@@ -220,11 +230,11 @@ document.addEventListener('mouseup', function(e) {
 document.addEventListener('mousedown', function(e) {
   let relativeX = e.x - canvas.offsetLeft;
 
-  if (e.y <= canvas.height - 70 || e.y >= canvas.height - 6)
+  mousedown = true;
+  if (e.y <= canvas.height - 70 || e.y >= canvas.height - 6 || end)
     return;
   if (relativeX >= 30 && relativeX <= 94) {
     leftState = 1;
-    mousedown = true;
     playerDir = -1;
     doodle.dx = -3;
 
@@ -232,7 +242,6 @@ document.addEventListener('mousedown', function(e) {
   else if (relativeX >= canvas.width - 94 && relativeX <= canvas.width - 30) {
     leftState = 0;
     rightState = 1;
-    mousedown = true;
     playerDir = 1;
     doodle.dx = 3;
   }
