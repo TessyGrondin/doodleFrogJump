@@ -53,21 +53,6 @@ function random(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-let y = platformStart;
-while (y > 0) {
-  y -= platformHeight + random(minPlatformSpace, maxPlatformSpace);
-  let x;
-  do {
-    x = random(25, canvas.width - 25 - platformWidth);
-  } while (
-    y > canvas.height / 2 &&
-    x > canvas.width / 2 - platformWidth * 1.5 &&
-    x < canvas.width / 2 + platformWidth / 2
-  );
-
-  platforms.push({ x, y });
-}
-
 const doodle = {
   width: 40,
   height: 60,
@@ -89,6 +74,8 @@ let prevDoodleY = doodle.y;
 
 let background = new Image(2000, 2000);
 background.src = "background.jpg"
+
+initialize();
 
 function display() {
   doodle.currentFrame += 1;
@@ -148,25 +135,7 @@ function loop() {
   }
 
   if (doodle.y > canvas.height) {
-    meters = 0
-    minPlatformSpace = 15;
-    maxPlatformSpace = 20;
-    doodle.x = canvas.width / 2 - 20
-    doodle.y = platformStart - 60
-    platforms = [{ x: canvas.width / 2 - platformWidth / 2, y: platformStart}]
-    let y = platformStart;
-    while (y > 0) {
-      y -= platformHeight + random(minPlatformSpace, maxPlatformSpace);
-      let x;
-      do {
-        x = random(25, canvas.width - 25 - platformWidth);
-      } while (
-        y > canvas.height / 2 &&
-        x > canvas.width / 2 - platformWidth * 1.5 &&
-        x < canvas.width / 2 + platformWidth / 2
-      );
-      platforms.push({ x, y });
-    }
+    initialize();
   }
 
   context.drawImage(background, 0, 0, 2000, 2000, 0, 0, canvas.width, canvas.height);
@@ -198,6 +167,28 @@ function loop() {
   platforms = platforms.filter(function(platform) {
     return platform.y < canvas.height;
   })
+}
+
+function initialize() {
+  meters = 0
+  minPlatformSpace = 15;
+  maxPlatformSpace = 20;
+  doodle.x = canvas.width / 2 - 20
+  doodle.y = platformStart - 60
+  platforms = [{ x: canvas.width / 2 - platformWidth / 2, y: platformStart}]
+  let y = platformStart;
+  while (y > 0) {
+    y -= platformHeight + random(minPlatformSpace, maxPlatformSpace);
+    let x;
+    do {
+      x = random(25, canvas.width - 25 - platformWidth);
+    } while (
+      y > canvas.height / 2 &&
+      x > canvas.width / 2 - platformWidth * 1.5 &&
+      x < canvas.width / 2 + platformWidth / 2
+    );
+    platforms.push({ x, y });
+  }
 }
 
 setInterval(display, 120);
