@@ -38,11 +38,15 @@ let minPlatformSpace = 15;
 let maxPlatformSpace = 20;
 
 let meters = 0;
-
+let leftState = 0;
+let rightState = 0;
 let time = 60;
 
 let platformImage = new Image();
 platformImage.src = "platform.png"
+
+let buttonImage = new Image();
+buttonImage.src = "button.png"
 
 let platforms = [{
   x: canvas.width / 2 - platformWidth / 2,
@@ -158,13 +162,14 @@ function loop() {
     }
   });
 
-
   context.fillStyle = 'yellow';
   context.drawImage(doodle.frog, doodle.currentFrame * 64, 0, 64, 64, doodle.x, doodle.y, doodle.width, doodle.height);
 
   context.fillText(Math.round(meters), canvas.width - (Math.round(meters).toString().length + 1) * 20, 40)
   context.fillText("Time left : " + time, 10, 40)
 
+  context.drawImage(buttonImage, leftState * 64, 0, 64, 64, 30, canvas.height - 70, 64, 64);
+  context.drawImage(buttonImage, rightState * 64 + 128, 0, 64, 64, canvas.width - 94, canvas.height - 70, 64, 64);
   prevDoodleY = doodle.y;
 
   platforms = platforms.filter(function(platform) {
@@ -173,6 +178,8 @@ function loop() {
 }
 
 function initialize() {
+  leftState = 0
+  rightState = 0
   time = 60
   meters = 0
   minPlatformSpace = 15;
@@ -206,12 +213,15 @@ setInterval(decrement, 1000);
 
 document.addEventListener('keydown', function(e) {
   if (e.which === 37) {
+    leftState = 1;
     keydown = true;
     playerDir = -1;
     doodle.dx = -3;
 
   }
   else if (e.which === 39) {
+    leftState = 0;
+    rightState = 1;
     keydown = true;
     playerDir = 1;
     doodle.dx = 3;
@@ -220,6 +230,8 @@ document.addEventListener('keydown', function(e) {
 
 document.addEventListener('keyup', function(e) {
   keydown = false;
+  leftState = 0;
+  rightState = 0;
 });
 
 requestAnimationFrame(loop);
