@@ -75,7 +75,7 @@ doodle.frog = new Image(64, 64);
 doodle.frog.src = "frog.png";
 
 let playerDir = 0;
-let keydown = false;
+let mousedown = false;
 let prevDoodleY = doodle.y;
 
 let background = new Image(2000, 2000);
@@ -109,12 +109,12 @@ function loop() {
       maxPlatformSpace += 0.5;
       maxPlatformSpace = Math.min(maxPlatformSpace, canvas.height / 2);
     }
-    meters += -doodle.dy
+    // meters += -doodle.dy
   } else {
     doodle.y += doodle.dy;
   }
 
-  if (!keydown) {
+  if (!mousedown) {
     if (playerDir < 0) {
       doodle.dx += drag;
 
@@ -211,27 +211,31 @@ setInterval(display, 120);
 
 setInterval(decrement, 1000);
 
-document.addEventListener('keydown', function(e) {
-  if (e.which === 37) {
+document.addEventListener('mouseup', function(e) {
+  mousedown = false;
+  leftState = 0;
+  rightState = 0;
+});
+
+document.addEventListener('mousedown', function(e) {
+  let relativeX = e.x - canvas.offsetLeft;
+
+  if (e.y <= canvas.height - 70 || e.y >= canvas.height - 6)
+    return;
+  if (relativeX >= 30 && relativeX <= 94) {
     leftState = 1;
-    keydown = true;
+    mousedown = true;
     playerDir = -1;
     doodle.dx = -3;
 
   }
-  else if (e.which === 39) {
+  else if (relativeX >= canvas.width - 94 && relativeX <= canvas.width - 30) {
     leftState = 0;
     rightState = 1;
-    keydown = true;
+    mousedown = true;
     playerDir = 1;
     doodle.dx = 3;
   }
-});
-
-document.addEventListener('keyup', function(e) {
-  keydown = false;
-  leftState = 0;
-  rightState = 0;
 });
 
 requestAnimationFrame(loop);
