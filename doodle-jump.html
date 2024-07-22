@@ -235,9 +235,10 @@ document.addEventListener('mouseup', function(e) {
 
 document.addEventListener('mousedown', function(e) {
   let relativeX = e.x - canvas.offsetLeft;
+  let relativeY = e.y - canvas.offsetTop;
 
   mousedown = true;
-  if (e.y <= canvas.height - 70 || e.y >= canvas.height - 6 || end)
+  if (relativeY <= canvas.height - 70 || relativeY >= canvas.height - 6 || end)
     return;
   if (relativeX >= 30 && relativeX <= 94) {
     leftState = 1;
